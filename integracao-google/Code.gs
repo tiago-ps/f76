@@ -112,8 +112,7 @@ function buildPayload_() {
       level: valueOrNull_(row, index, 'itemLevel'),
       legendaryStars: valueOrNull_(row, index, 'numLegendaryStars'),
       effects: effects,
-      tradable: booleanOrNull_(row, index, 'isTradable'),
-      weight: valueOrNull_(row, index, 'weight')
+      tradable: booleanOrNull_(row, index, 'isTradable')
     });
   }
 
