@@ -2,27 +2,48 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#171a16">
+<meta name="description" content="Catálogo pessoal de armas únicas do Fallout 76. Marque suas armas e acompanhe quantidades.">
 <title>Arsenal Único — Fallout 76</title>
 <style>
+:root{color-scheme:dark}*{box-sizing:border-box}
 body{margin:0;background:#171a16;color:#eee9dc;font:16px Arial,sans-serif;display:grid;place-items:center;min-height:100vh}
 main{max-width:620px;padding:28px;text-align:center}
-h1{color:#b5d65c}
-p{line-height:1.5;color:#c8cdbd}
+h1{color:#b5d65c}p{line-height:1.5;color:#c8cdbd}
+#status{overflow-wrap:anywhere}
 </style>
 </head>
 <body>
-<main><h1>Arsenal Único — Fallout 76</h1><p id="status">Carregando o catálogo…</p></main>
+<main><h1>Arsenal Único — Fallout 76</h1><p id="status">Carregando o catálogo…</p><p>Se esta tela não mudar, atualize a página ou confira sua conexão.</p></main>
 <script>
 (async()=>{
  try{
-  const [a,b]=await Promise.all(['arsenal-data-1.txt','arsenal-data-2.txt'].map(async p=>(await fetch('./'+p)).text()));
-  const bin=atob(a.trim()+b.trim()), bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));
-  if(!('DecompressionStream' in window)) throw new Error('Este navegador não oferece suporte à descompactação necessária.');
+  const [a,b]=await Promise.all(['arsenal-data-1.txt','arsenal-data-2.txt'].map(async p=>{const r=await fetch('./'+p,{cache:'no-cache'});if(!r.ok)throw new Error('Não foi possível carregar '+p);return r.text()}));
+  const bin=atob(a.trim()+b.trim()),bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));
+  if(!('DecompressionStream'in window))throw new Error('Navegador sem suporte à descompactação gzip.');
   const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
-  const html=await new Response(stream).text();
+  let html=await new Response(stream).text();
+  const pwaHead='<link rel="manifest" href="./manifest.webmanifest"><meta name="theme-color" content="#171a16"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><link rel="icon" href="./icon.svg" type="image/svg+xml">';
+  html=html.replace(/<head([^>]*)>/i,'<head$1>'+pwaHead);
+  const repair=`<style>img{max-width:100%}img.image-fallback{object-fit:contain;background:#222820;padding:12px}</style><script>
+  (function(){
+    function fix(img){
+      if(!img||img.dataset.f76Tried||!img.src||img.src.startsWith('data:'))return;
+      img.dataset.f76Tried='1';
+      var original=img.currentSrc||img.src;
+      var clean=original.replace(/^https?:\\/\\//,'');
+      img.onerror=function(){img.onerror=null;img.classList.add('image-fallback');img.alt=img.alt||'Imagem indisponível';};
+      img.src='https://images.weserv.nl/?url='+encodeURIComponent(clean);
+    }
+    document.querySelectorAll('img').forEach(function(img){if(img.complete&&img.naturalWidth===0)fix(img);else img.addEventListener('error',function(){fix(img)},{once:true});});
+    new MutationObserver(function(records){records.forEach(function(rec){rec.addedNodes.forEach(function(n){if(n.nodeType===1){if(n.tagName==='IMG')n.addEventListener('error',function(){fix(n)},{once:true});n.querySelectorAll&&n.querySelectorAll('img').forEach(function(i){i.addEventListener('error',function(){fix(i)},{once:true});});}});});}).observe(document.documentElement,{childList:true,subtree:true});
+  })();
+  <\/script>`;
+  html=html.replace(/<\/head>/i,repair+'</head>');
   document.open();document.write(html);document.close();
- }catch(e){document.getElementById('status').textContent='Não foi possível carregar o catálogo: '+e.message;}
+  setTimeout(function(){if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(function(e){console.warn('PWA:',e)});},500);
+ }catch(e){document.getElementById('status').textContent='Erro ao abrir o catálogo: '+e.message;}
 })();
 </script>
 </body>
