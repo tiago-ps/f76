@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Arsenal Único — Fallout 76</title>
+<style>
+body{margin:0;background:#171a16;color:#eee9dc;font:16px Arial,sans-serif;display:grid;place-items:center;min-height:100vh}
+main{max-width:620px;padding:28px;text-align:center}
+h1{color:#b5d65c}
+p{line-height:1.5;color:#c8cdbd}
+</style>
+</head>
+<body>
+<main><h1>Arsenal Único — Fallout 76</h1><p id="status">Carregando o catálogo…</p></main>
+<script>
+(async()=>{
+ try{
+  const [a,b]=await Promise.all(['arsenal-data-1.txt','arsenal-data-2.txt'].map(async p=>(await fetch('./'+p)).text()));
+  const bin=atob(a.trim()+b.trim()), bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));
+  if(!('DecompressionStream' in window)) throw new Error('Este navegador não oferece suporte à descompactação necessária.');
+  const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+  const html=await new Response(stream).text();
+  document.open();document.write(html);document.close();
+ }catch(e){document.getElementById('status').textContent='Não foi possível carregar o catálogo: '+e.message;}
+})();
+</script>
+</body>
+</html>
