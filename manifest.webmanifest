@@ -1,0 +1,16 @@
+{
+  "id": "./",
+  "name": "Arsenal Único — Fallout 76",
+  "short_name": "Arsenal F76",
+  "description": "Seu inventário pessoal de armas únicas do Fallout 76.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#171a16",
+  "theme_color": "#171a16",
+  "icons": [
+    {"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}
