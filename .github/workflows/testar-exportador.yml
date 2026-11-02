@@ -40,7 +40,7 @@ jobs:
                     "itemLevel": 50,
                     "numLegendaryStars": 1,
                     "ItemCardEntries": [
-                      {"text": "DESC", "value": "Efeito lendário de teste\\nDescrição adicional"}
+                      {"text": "DESC", "value": "Efeito lendário de teste\nDescrição adicional"}
                     ]
                   },
                   {
