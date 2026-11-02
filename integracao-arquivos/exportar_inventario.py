@@ -153,6 +153,10 @@ def main():
                 continue
             if number(item.get("filterFlag")) not in WEAPON_FILTER_FLAGS:
                 continue
+            # Os registros de armas têm dano numérico positivo. Isso exclui
+            # falsos positivos do mesmo grupo (binóculos, fertilizante etc.).
+            if (number(item.get("damage"), 0) or 0) <= 0:
+                continue
             exported = export_item(item, location)
             if exported:
                 records.append(exported)
@@ -183,9 +187,9 @@ def main():
     print(f"  Personagem: {player_count}")
     print(f"  Baú: {stash_count}")
     print(f"Registros com descrições de efeitos: {with_effects}")
-    print("Filtro provisório: filterFlag 4, 5 e 6 (categoria de armas do mod).")
+    print("Filtro: filterFlag 4, 5 e 6 + dano maior que zero.")
     print("Privacidade: nomes de conta/personagem e identificadores de instância não são exportados.")
-    print("A seleção ainda pode incluir itens utilitários/lançáveis; a classificação visual deve ser revisada.")
+    print("A classificação usa os campos do próprio dump; revise novos tipos se o mod alterar os flags.")
 
 
 if __name__ == "__main__":
