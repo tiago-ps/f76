@@ -5,12 +5,17 @@ Esta pasta contém a primeira etapa da integração do catálogo Fallout 76 com 
 ## Fonte inicial
 
 - Planilha: ID já configurado no código.
-- Aba inicial: `Cópia de DumpPTBR3`.
+- Aba de origem: `DumpPTBR3` completa.
 - Cabeçalho: linha 2.
 - Registros: a partir da linha 3.
-- Filtro publicado pela API: somente linhas cujo `itemType` seja `WEAPON`.
+- Idioma de referência: português brasileiro (PT-BR).
+- Filtro publicado pela API: registros com `filterFlag` igual a `4`, `5` ou `6`.
 
-A API não devolve os campos `char`, `account`, `serverHandleID`, nem o conteúdo das demais abas. Ela entrega apenas nome, quantidade, nível, efeitos lendários, negociabilidade e peso.
+A aba completa não possui a coluna `itemType`. Por isso, a classificação inicial usa `filterFlag`. Os valores 4, 5 e 6 foram cruzados com os registros identificados como `WEAPON` na aba simplificada `Cópia de DumpPTBR3`. No arquivo analisado, os 311 registros com esses valores também apresentam atributos de arma. Essa regra deverá ser revista se futuras versões do exportador alterarem os valores.
+
+A API entrega somente nome, chave normalizada, quantidade, nível, estrelas lendárias, negociabilidade e peso. O campo `effects` permanece como lista vazia nesta etapa: a aba completa não possui as colunas `legendary_1` a `legendary_4` existentes na cópia simplificada. Não inferimos efeitos a partir do nome.
+
+A API não devolve `char`, `account`, `serverHandleID`, nem o conteúdo das outras abas.
 
 ## Preparar o Apps Script
 
