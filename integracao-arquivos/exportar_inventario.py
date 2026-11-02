@@ -107,10 +107,10 @@ def main():
         "weapons": weapons,
     }
 
-    output = "/* Gerado automaticamente. Não edite manualmente. */\\n"
+    output = "/* Gerado automaticamente. Não edite manualmente. */\n"
     output += "window.F76_INVENTARIO = "
     output += json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
-    output += ";\\n"
+    output += ";\n"
     args.output.write_text(output, encoding="utf-8")
 
     print(f"Arquivo criado: {args.output.resolve()}")
