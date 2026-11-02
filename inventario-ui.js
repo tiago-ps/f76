@@ -1,7 +1,7 @@
 (function(){
   const inv=window.F76_INVENTARIO;
   if(!inv||!Array.isArray(inv.records))return;
-  const norm=s=>String(s||"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+  const norm=s=>{const raw=String(s||"").normalize("NFD").replace(/[\\u0300-\\u036f]/g,"").toLowerCase().trim();return raw.replace(/[^a-z0-9]+/g," ").trim()||raw.replace(/\\s+/g," ")};
   const data=inv.records;
   const owned=new Map();
   data.forEach(item=>{
