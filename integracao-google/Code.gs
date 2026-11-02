@@ -1,24 +1,30 @@
 /**
  * Integração Fallout 76 — Google Sheets
  *
- * Primeira fonte: inventário de armas em português.
- * A API expõe somente campos selecionados de registros WEAPON.
- * Não retorna char, account, serverHandleID ou o conteúdo das outras abas.
+ * Fonte: aba completa DumpPTBR3 (exportação PT-BR do Invent-O-Matic).
+ * A classificação de armas usa filterFlag, pois a aba completa não possui
+ * a coluna itemType. Os valores 4, 5 e 6 foram conferidos contra os registros
+ * classificados como WEAPON na aba simplificada da planilha.
+ *
+ * A API expõe somente campos selecionados de armas.
+ * Não retorna char, account, serverHandleID nem dados das demais abas.
  */
 
 const F76_CONFIG = {
   spreadsheetId: '1fpkiCy_tdEuGvgFnD9V5zuNxBOMBedLDwrFTwfS4Yp4',
-  initialSheetName: 'Cópia de DumpPTBR3',
+  initialSheetName: 'DumpPTBR3',
   headerRow: 2,
   sourceRole: 'inventory_ptbr',
   metadataKey: 'F76_SOURCE_ROLE',
   cacheSeconds: 0
 };
 
+// filterFlag observado na fonte completa e cruzado com itemType=WEAPON.
+const F76_WEAPON_FILTER_FLAGS = [4, 5, 6];
+
 /**
  * Executar uma única vez no editor do Apps Script.
- * Marca a aba escolhida com metadados persistentes. Depois disso,
- * renomear a aba não quebra a integração.
+ * Marca a aba escolhida com metadados persistentes.
  */
 function setupF76() {
   const ss = SpreadsheetApp.openById(F76_CONFIG.spreadsheetId);
@@ -36,7 +42,7 @@ function setupF76() {
     sheet.addDeveloperMetadata(F76_CONFIG.metadataKey, F76_CONFIG.sourceRole);
   }
 
-  return 'Integração preparada. Aba identificada por metadado; renomeá-la não altera a conexão.';
+  return 'Integração preparada. Fonte: DumpPTBR3 completa; classificação de armas por filterFlag.';
 }
 
 /** Endpoint de leitura. Aceita JSONP para funcionar no GitHub Pages sem CORS. */
@@ -46,7 +52,7 @@ function doGet(e) {
     const callback = e && e.parameter ? String(e.parameter.callback || '') : '';
 
     if (callback) {
-      if (!/^[A-Za-z_$][A-Za-z0-9_$]*(\.[A-Za-z_$][A-Za-z0-9_$]*)*$/.test(callback)) {
+      if (!/^[A-Za-z_$][A-Za-z0-9_$]*(\\.[A-Za-z_$][A-Za-z0-9_$]*)*$/.test(callback)) {
         throw new Error('Callback inválido.');
       }
       return ContentService
@@ -71,7 +77,10 @@ function buildPayload_() {
   const lastColumn = sheet.getLastColumn();
 
   if (lastRow <= F76_CONFIG.headerRow) {
-    return { ok: true, source: F76_CONFIG.sourceRole, updatedAt: new Date().toISOString(), count: 0, weapons: [] };
+    return {
+      ok: true, source: F76_CONFIG.sourceRole,
+      updatedAt: new Date().toISOString(), count: 0, weapons: []
+    };
   }
 
   const values = sheet.getRange(
@@ -85,24 +94,25 @@ function buildPayload_() {
   const index = {};
   headers.forEach(function (h, i) { if (h) index[h] = i; });
 
-  const required = ['text', 'count', 'itemType'];
+  const required = ['text', 'count', 'filterFlag'];
   const missing = required.filter(function (h) { return index[h] === undefined; });
   if (missing.length) {
-    throw new Error('Colunas obrigatórias ausentes: ' + missing.join(', '));
+    throw new Error('Colunas obrigatórias ausentes em DumpPTBR3: ' + missing.join(', '));
   }
 
   const weapons = [];
+  let ignoredRows = 0;
+
   for (let r = 1; r < values.length; r++) {
     const row = values[r];
     const name = String(row[index.text] || '').trim();
-    const type = String(row[index.itemType] || '').trim().toUpperCase();
-    if (!name || type !== 'WEAPON') continue;
+    if (!name) continue;
 
-    const effects = ['legendary_1', 'legendary_2', 'legendary_3', 'legendary_4']
-      .map(function (key) {
-        return index[key] === undefined ? '' : String(row[index[key]] || '').trim();
-      })
-      .filter(Boolean);
+    const filterFlag = numberOrNull_(row[index.filterFlag]);
+    if (filterFlag === null || F76_WEAPON_FILTER_FLAGS.indexOf(filterFlag) === -1) {
+      ignoredRows++;
+      continue;
+    }
 
     const quantity = numberOrZero_(row[index.count]);
     weapons.push({
@@ -111,14 +121,16 @@ function buildPayload_() {
       quantity: quantity,
       level: valueOrNull_(row, index, 'itemLevel'),
       legendaryStars: valueOrNull_(row, index, 'numLegendaryStars'),
-      effects: effects,
-      tradable: booleanOrNull_(row, index, 'isTradable')
+      effects: [],
+      tradable: booleanOrNull_(row, index, 'isTradable'),
+      weight: valueOrNull_(row, index, 'weight')
     });
   }
 
   return {
     ok: true,
     source: F76_CONFIG.sourceRole,
+    locale: 'pt-BR',
     updatedAt: new Date().toISOString(),
     count: weapons.length,
     weapons: weapons
@@ -137,7 +149,7 @@ function findSourceSheet_() {
   if (matches.length !== 1) {
     throw new Error(
       matches.length === 0
-        ? 'A aba de inventário ainda não foi preparada. Execute setupF76() uma vez.'
+        ? 'A aba DumpPTBR3 ainda não foi preparada. Execute setupF76() uma vez.'
         : 'Mais de uma aba está marcada como fonte do inventário. Revise os metadados.'
     );
   }
@@ -147,7 +159,7 @@ function findSourceSheet_() {
 function normalizeKey_(value) {
   return String(value || '')
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\\u0300-\\u036f]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
@@ -156,6 +168,12 @@ function normalizeKey_(value) {
 function numberOrZero_(value) {
   const n = Number(String(value || '').replace(',', '.'));
   return Number.isFinite(n) ? n : 0;
+}
+
+function numberOrNull_(value) {
+  if (value === null || value === undefined || String(value).trim() === '') return null;
+  const n = Number(String(value).replace(',', '.'));
+  return Number.isFinite(n) ? n : null;
 }
 
 function valueOrNull_(row, index, key) {
