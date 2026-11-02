@@ -52,7 +52,7 @@ function doGet(e) {
     const callback = e && e.parameter ? String(e.parameter.callback || '') : '';
 
     if (callback) {
-      if (!/^[A-Za-z_$][A-Za-z0-9_$]*(\\.[A-Za-z_$][A-Za-z0-9_$]*)*$/.test(callback)) {
+      if (!/^[A-Za-z_$][A-Za-z0-9_$]*(\.[A-Za-z_$][A-Za-z0-9_$]*)*$/.test(callback)) {
         throw new Error('Callback inválido.');
       }
       return ContentService
@@ -159,7 +159,7 @@ function findSourceSheet_() {
 function normalizeKey_(value) {
   return String(value || '')
     .normalize('NFD')
-    .replace(/[\\u0300-\\u036f]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, ' ')
     .trim();
