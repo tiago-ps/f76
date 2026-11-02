@@ -19,6 +19,8 @@ h1{color:#b5d65c}p{line-height:1.5;color:#c8cdbd}
 <script>
 (async()=>{
  try{
+  // Carrega o inventário substituível antes de abrir a aplicação compactada.
+  await new Promise((resolve,reject)=>{const s=document.createElement('script');s.src='./inventario.js';s.onload=resolve;s.onerror=()=>reject(new Error('Não foi possível carregar inventario.js. Confira se o arquivo está na mesma pasta do site.'));document.head.appendChild(s);});
   const [a,b]=await Promise.all(['arsenal-data-1.txt','arsenal-data-2.txt'].map(async p=>{const r=await fetch('./'+p,{cache:'no-cache'});if(!r.ok)throw new Error('Não foi possível carregar '+p);return r.text()}));
   const bin=atob(a.trim()+b.trim()),bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));
   if(!('DecompressionStream'in window))throw new Error('Navegador sem suporte à descompactação gzip.');
