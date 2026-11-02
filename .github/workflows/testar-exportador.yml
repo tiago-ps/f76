@@ -48,6 +48,12 @@ jobs:
                     "filterFlag": 4,
                     "damage": 0,
                     "count": 1
+                  },
+                  {
+                    "text": "++++ ¢",
+                    "filterFlag": 6,
+                    "damage": 10,
+                    "count": 1
                   }
                 ],
                 "stashInventory": [
@@ -80,9 +86,10 @@ jobs:
           text = Path("inventario-teste.js").read_text(encoding="utf-8")
           payload = json.loads(text.split("window.F76_INVENTARIO = ", 1)[1].rsplit(";", 1)[0])
 
-          assert payload["count"] == 2, payload["count"]
-          assert payload["countsByLocation"] == {"personagem": 1, "bau": 1}
+          assert payload["count"] == 3, payload["count"]
+          assert payload["countsByLocation"] == {"personagem": 2, "bau": 1}
           assert payload["records"][0]["effects"] == ["Efeito lendário de teste"]
+          assert any(item["name"] == "++++ ¢" and item["catalogKey"] == "++++ ¢" for item in payload["records"])
           assert "NAO_EXPORTAR_CONTA" not in text
           assert "NAO_EXPORTAR_PERSONAGEM" not in text
           assert "serverHandleID" not in text
