@@ -1,48 +1,43 @@
 # Inventário por arquivo — Fallout 76
 
-A proposta desta etapa é separar os dados pessoais da aplicação. O inventário passa a ser um arquivo JavaScript substituível, sem API, Apps Script ou conexão obrigatória com o Google Sheets.
+O inventário é gerado diretamente do arquivo `itemsmod.ini` produzido pelo mod **Invent-O-Matic-Extractor**. A planilha Google Sheets/Excel não faz mais parte do fluxo de atualização.
 
-## Arquivo de inventário
+## Gerar o inventário
 
-O arquivo fica na raiz do site:
+O exportador está em `integracao-arquivos/exportar_inventario.py` e usa apenas Python 3, sem instalar bibliotecas adicionais.
 
-`inventario.js`
+1. Copie o `itemsmod.ini` gerado pelo mod para a pasta do exportador (ou informe o caminho completo).
+2. Abra o terminal nessa pasta.
+3. Execute:
 
-Ele define o objeto global `window.F76_INVENTARIO`, com esta estrutura:
+   `python exportar_inventario.py itemsmod.ini --output inventario.js`
 
-- `schemaVersion`: versão do formato.
-- `locale`: idioma dos nomes.
-- `updatedAt`: data da exportação.
-- `count`: quantidade de registros.
-- `weapons`: lista de armas do inventário.
+4. O arquivo `inventario.js` será criado. Copie-o para a raiz do site, substituindo o arquivo anterior.
 
-Cada arma contém nome, chave normalizada, quantidade, nível, estrelas, efeitos, negociabilidade e peso. Campos desconhecidos permanecem nulos ou vazios; não são deduzidos.
+Se o arquivo contiver mais de um personagem, informe o nome interno com `--character "Nome"`. O nome é usado apenas para selecionar os dados e não é gravado no arquivo exportado.
 
-## Gerar o arquivo a partir da planilha
+## Dados exportados
 
-1. Baixe a planilha como arquivo Excel (.xlsx).
-2. Tenha Python instalado.
-3. Instale a dependência: `python -m pip install openpyxl`.
-4. Execute na pasta do exportador:
+O formato atual usa `schemaVersion: 2` e contém:
 
-   `python exportar_inventario.py caminho/para/F76.xlsx --output inventario.js`
+- `records`: registros individuais, sem juntar unidades que possam ter efeitos diferentes.
+- `location`: `personagem` ou `bau`.
+- Nome, quantidade, nível, peso e condição de negociação.
+- Estrelas lendárias e descrições de efeitos encontradas no campo `DESC` de `ItemCardEntries`.
+- Dano, precisão, alcance, cadência e `filterFlag`, quando fornecidos pelo mod.
 
-5. Copie o arquivo gerado para a raiz do site, substituindo o `inventario.js` existente.
+O exportador usa provisoriamente `filterFlag` 4, 5 e 6. Essa seleção corresponde à categoria de armas do mod, mas pode incluir itens utilitários ou lançáveis (por exemplo, binóculos, câmera ou explosivos). A interface deverá permitir revisar/filtrar esses casos; não se deve interpretar todo registro como arma de fogo.
 
-O exportador lê a aba completa `DumpPTBR3`, considera a linha 2 como cabeçalho e usa provisoriamente `filterFlag` 4, 5 e 6 para selecionar armas. Essa regra vem da análise do dump disponível e deve ser revista se o formato do exportador do jogo mudar.
-
-O dump completo analisado não oferece as colunas de efeitos lendários. Por isso, `effects` permanece vazio. O script não inventa efeitos a partir dos nomes.
-
-## Uso offline e hospedagem
-
-O site continua podendo ser hospedado em qualquer serviço estático. O arquivo `inventario.js` deve acompanhar o site na mesma pasta de `index.html`. Para uso offline por abertura direta do arquivo, o carregamento será feito como script local, sem requisição `fetch`.
-
-Na hospedagem, substitua somente `inventario.js` quando quiser atualizar os dados. Se o site estiver instalado como PWA, pode ser necessário fechar e abrir novamente ou limpar/atualizar o cache do navegador para obter a versão nova.
+Os efeitos são extraídos das primeiras linhas de `DESC`, em quantidade correspondente às estrelas. Linhas posteriores são mantidas em `description`, mas não classificadas automaticamente como efeitos lendários. Quando o mod não fornece `DESC`, `effects` fica vazio; o script não inventa efeitos.
 
 ## Privacidade
 
-O arquivo representa o inventário que o usuário escolheu exportar. Antes de compartilhar um site hospedado publicamente, confira o conteúdo do arquivo. O exportador inclui apenas campos selecionados das armas e não exporta nome de personagem, conta, identificadores de instância ou outras abas da planilha.
+O arquivo exportado **não inclui** nome da conta, nome do personagem, `serverHandleID`, `containerID` ou o conteúdo bruto do arquivo do mod. Apenas os campos explicitamente selecionados são gravados.
 
-## Estado da integração
+O `itemsmod.ini` original permanece no computador do usuário. Não publique esse arquivo bruto. Para publicar o inventário, revise o `inventario.js` gerado e compartilhe apenas se desejar tornar públicos os itens e quantidades.
 
-Este pacote define o formato do arquivo e o exportador. A interface do catálogo ainda precisa ser conectada aos campos de `window.F76_INVENTARIO` para exibir automaticamente posse e quantidades; não considere a leitura visual do inventário concluída até essa etapa ser testada na aplicação.
+## Hospedagem e uso offline
+
+O `inventario.js` fica na raiz do site, ao lado de `index.html`. Para atualizar, substitua somente esse arquivo. O site pode ser hospedado em qualquer serviço estático; o arquivo também pode acompanhar uma cópia local do site.
+
+A integração da interface do catálogo com os registros ainda precisa ser concluída e testada. O exportador já gera os dados, mas isso não significa que a aplicação já exiba automaticamente a posse dos itens.
