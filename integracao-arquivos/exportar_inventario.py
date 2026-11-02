@@ -27,7 +27,10 @@ WEAPON_FILTER_FLAGS = {4, 5, 6}
 def normalize_key(value: str) -> str:
     value = unicodedata.normalize("NFD", str(value or ""))
     value = "".join(ch for ch in value if unicodedata.category(ch) != "Mn")
-    return re.sub(r"[^a-z0-9]+", " ", value.lower()).strip()
+    normalized = re.sub(r"[^a-z0-9]+", " ", value.lower()).strip()
+    # Alguns registros válidos do mod têm nomes formados apenas por símbolos.
+    # Preserve o texto original normalizado em vez de descartar esses itens.
+    return normalized or re.sub(r"\\s+", " ", str(value or "").strip().lower())
 
 
 def number(value: Any, default=None):
