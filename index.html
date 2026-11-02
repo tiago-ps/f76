@@ -43,6 +43,7 @@ h1{color:#b5d65c}p{line-height:1.5;color:#c8cdbd}
   })();
   <\/script>`;
   html=html.replace(/<\/head>/i,repair+'</head>');
+  html=html.replace(/<\\/body>/i,'<script src="./inventario-ui.js"><\\/script></body>');
   document.open();document.write(html);document.close();
   setTimeout(function(){if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js').catch(function(e){console.warn('PWA:',e)});},500);
  }catch(e){document.getElementById('status').textContent='Erro ao abrir o catálogo: '+e.message;}
