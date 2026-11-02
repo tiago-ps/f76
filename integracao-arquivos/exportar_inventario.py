@@ -85,10 +85,6 @@ def main():
         if flag not in WEAPON_FILTER_FLAGS:
             continue
 
-        def get(field):
-            pos = index.get(field)
-            return row[pos] if pos is not None else None
-
         level = number(get("itemLevel"))
         stars = number(get("numLegendaryStars"))
         weight = number(get("weight"))
