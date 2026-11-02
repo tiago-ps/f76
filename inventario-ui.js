@@ -7,9 +7,10 @@
   data.forEach(item=>{
     const key=norm(item.catalogKey||item.name);
     if(!key)return;
-    const current=owned.get(key)||{count:0,locations:new Set()};
+    const current=owned.get(key)||{count:0,locations:new Set(),sourceNames:new Set()};
     current.count+=Number(item.quantity)||1;
     current.locations.add(item.location);
+    current.sourceNames.add(String(item.name||""));
     owned.set(key,current);
   });
   const css=document.createElement("style");
@@ -24,7 +25,8 @@
       if(el.closest("#f76-inv-overlay")||el.querySelector(".f76-owned-badge")||el.dataset.f76OwnedChecked)return;
       const key=norm(el.textContent);
       const match=owned.get(key);
-      if(!match)return;
+      // Se nomes diferentes colidirem na normalização, não atribui posse automaticamente.
+      if(!match||match.sourceNames.size!==1)return;
       el.dataset.f76OwnedChecked="1";
       const badge=document.createElement("span");
       badge.className="f76-owned-badge";
