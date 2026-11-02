@@ -44,6 +44,6 @@ A integração da interface do catálogo com os registros ainda precisa ser conc
 
 ## Painel visual
 
-A aplicação carrega `inventario-ui.js` após abrir o catálogo. O painel independente consulta `window.F76_INVENTARIO.records`, permite busca por nome/descrição dos efeitos e filtra por personagem ou baú. O arquivo também é incluído no cache inicial do PWA. O painel não modifica o catálogo compactado.
+A aplicação carrega `inventario-ui.js` após abrir o catálogo. O painel independente consulta `window.F76_INVENTARIO.records`, permite busca por nome/descrição dos efeitos e filtra por personagem ou baú. O arquivo também é incluído no cache inicial do PWA. O painel não modifica o catálogo compactado. A interface também procura títulos de cards cujo nome corresponda exatamente ao `catalogKey`/nome normalizado do inventário e acrescenta o indicador **“Na coleção”**, com local (personagem/baú) e quantidade quando maior que um. A correspondência é intencionalmente conservadora: nomes apenas parecidos não recebem marcação. Como o catálogo está compactado, essa integração ocorre externamente, por observação dos títulos renderizados, sem alterar os dados ou a estrutura interna do catálogo.
 
 **Atenção:** publicar um `inventario.js` preenchido torna os dados nele contidos acessíveis aos visitantes do site. O modelo vazio do repositório não contém inventário pessoal; revise o arquivo gerado antes de substituí-lo ou publicá-lo.
