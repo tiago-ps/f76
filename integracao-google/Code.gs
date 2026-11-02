@@ -33,6 +33,18 @@ function setupF76() {
     throw new Error('Não encontrei a aba inicial: ' + F76_CONFIG.initialSheetName);
   }
 
+  // Remove a marcação antiga da fonte anterior, se houver, para manter
+  // exatamente uma aba como inventário sem apagar ou alterar células.
+  ss.getSheets().forEach(function (candidate) {
+    if (candidate.getSheetId() === sheet.getSheetId()) return;
+    candidate.getDeveloperMetadata().forEach(function (m) {
+      if (m.getKey() === F76_CONFIG.metadataKey &&
+          m.getValue() === F76_CONFIG.sourceRole) {
+        m.remove();
+      }
+    });
+  });
+
   const alreadyMarked = sheet.getDeveloperMetadata().some(function (m) {
     return m.getKey() === F76_CONFIG.metadataKey &&
       m.getValue() === F76_CONFIG.sourceRole;
