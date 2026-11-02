@@ -56,7 +56,7 @@ def description_lines(item: dict) -> list[str]:
     if not raw:
         return []
     result = []
-    for line in str(raw).replace("\\r", "").split("\\n"):
+    for line in str(raw).replace("\r", "").split("\n"):
         # ¬ e § são marcadores visuais presentes no texto do mod.
         cleaned = line.replace("¬", "").replace("§", "").strip()
         if cleaned:
@@ -105,7 +105,7 @@ def export_item(item: dict, location: str) -> dict | None:
         "legendaryStars": stars,
         "legendaryModCount": number(card_value(item, "legendaryMods")),
         "effects": effects_from_description(item),
-        "description": "\\n".join(description_lines(item)),
+        "description": "\n".join(description_lines(item)),
         "tradable": item.get("isTradable"),
         "weight": number(item.get("weight")),
         "damage": number(item.get("damage")),
@@ -171,10 +171,10 @@ def main():
         "records": records,
     }
 
-    output = "/* Gerado automaticamente a partir de itemsmod.ini. Não edite manualmente. */\\n"
+    output = "/* Gerado automaticamente a partir de itemsmod.ini. Não edite manualmente. */\n"
     output += "window.F76_INVENTARIO = "
     output += json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
-    output += ";\\n"
+    output += ";\n"
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(output, encoding="utf-8")
 
