@@ -40,4 +40,4 @@ O `itemsmod.ini` original permanece no computador do usuário. Não publique ess
 
 O `inventario.js` fica na raiz do site, ao lado de `index.html`. Para atualizar, substitua somente esse arquivo. O site pode ser hospedado em qualquer serviço estático; o arquivo também pode acompanhar uma cópia local do site.
 
-A integração da interface do catálogo com os registros ainda precisa ser concluída e testada. O exportador já gera os dados, mas isso não significa que a aplicação já exiba automaticamente a posse dos itens.
+A integração da interface do catálogo com os registros ainda precisa ser concluída e testada. O exportador já gera os dados, mas isso não significa que a aplicação já exiba automaticamente a posse dos itens. No PWA hospedado, o service worker consulta a rede para `inventario.js` a cada carregamento e mantém a última cópia válida para uso offline; assim, a atualização dos dados não exige alterar a versão do service worker.
