@@ -1,11 +1,13 @@
 /*
  * Inventário pessoal — Fallout 76
- * Substitua este arquivo pelo gerado pelo exportador.
+ * Arquivo-modelo vazio. Substitua pelo gerado a partir do itemsmod.ini.
  * Não coloque aqui dados de conta, personagem ou identificadores privados.
  */
 window.F76_INVENTARIO = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   locale: "pt-BR",
   updatedAt: null,
-  weapons: []
+  count: 0,
+  countsByLocation: { personagem: 0, bau: 0 },
+  records: []
 };
