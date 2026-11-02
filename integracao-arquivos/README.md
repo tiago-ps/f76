@@ -41,3 +41,9 @@ O `itemsmod.ini` original permanece no computador do usuário. Não publique ess
 O `inventario.js` fica na raiz do site, ao lado de `index.html`. Para atualizar, substitua somente esse arquivo. O site pode ser hospedado em qualquer serviço estático; o arquivo também pode acompanhar uma cópia local do site.
 
 A integração da interface do catálogo com os registros ainda precisa ser concluída e testada. O exportador já gera os dados, mas isso não significa que a aplicação já exiba automaticamente a posse dos itens. No PWA hospedado, o service worker consulta a rede para `inventario.js` a cada carregamento e mantém a última cópia válida para uso offline; assim, a atualização dos dados não exige alterar a versão do service worker.
+
+## Painel visual
+
+A aplicação carrega `inventario-ui.js` após abrir o catálogo. O painel independente consulta `window.F76_INVENTARIO.records`, permite busca por nome/descrição dos efeitos e filtra por personagem ou baú. O arquivo também é incluído no cache inicial do PWA. O painel não modifica o catálogo compactado.
+
+**Atenção:** publicar um `inventario.js` preenchido torna os dados nele contidos acessíveis aos visitantes do site. O modelo vazio do repositório não contém inventário pessoal; revise o arquivo gerado antes de substituí-lo ou publicá-lo.
